@@ -8,4 +8,5 @@ with same email and mobile
 because in REACT we are storing our login user data in the localhost and localhost is same for all the user of a system.
     -> to tovercome from this we need to store our login user data in the cookies because cookies are different for 
         different different webpage
-    
+
+3. work on close account of user

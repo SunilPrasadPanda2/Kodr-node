@@ -48,8 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .status(403)
       .json(new ApiResponse(403, error.details[0], "Validation failed."));
   }
-  const { name, phone, email, gender, password, userType } =
-    req.body;
+  const { name, phone, email, gender, password, userType } = req.body;
 
   // if (password !== confirmPassword) {
   //   return res
@@ -188,7 +187,7 @@ const loginUserByEmail = asyncHandler(async (req, res) => {
 const loginUserByPhone = asyncHandler(async (req, res) => {
   const userLoginSchema = Joi.object({
     phone: Joi.string().required(),
-    otp: Joi.string().length(4).pattern(/^\d+$/).required(),
+    // otp: Joi.string().length(4).pattern(/^\d+$/).required(),
   });
 
   const { error, value } = userLoginSchema.validate(req.body);
@@ -198,11 +197,11 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
       .json(new ApiResponse(403, error.details[0], "Validation failed."));
   }
 
-  const { phone, otp } = value;
+  const { phone } = value;
 
-  if (otp !== "2222") {
-    return res.status(403).json(new ApiResponse(403, {}, "Invalid OTP."));
-  }
+  // if (otp !== "2222") {
+  //   return res.status(403).json(new ApiResponse(403, {}, "Invalid OTP."));
+  // }
 
   try {
     const user = await User.findOne({ phone });
