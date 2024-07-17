@@ -125,7 +125,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-const loginUser = asyncHandler(async (req, res) => {
+const loginUserByEmail = asyncHandler(async (req, res) => {
   const userLoginSchema = Joi.object({
     email: Joi.string().required(),
     password: Joi.string().required(),
@@ -184,6 +184,69 @@ const loginUser = asyncHandler(async (req, res) => {
       .json({ message: "Failed to login user", error: err.message });
   }
 });
+
+const loginUserByPhone = asyncHandler(async (req, res) => {
+  const userLoginSchema = Joi.object({
+    phone: Joi.string().required(),
+    otp: Joi.string().length(4).pattern(/^\d+$/).required(),
+  });
+
+  const { error, value } = userLoginSchema.validate(req.body);
+  if (error) {
+    return res
+      .status(403)
+      .json(new ApiResponse(403, error.details[0], "Validation failed."));
+  }
+
+  const { phone, otp } = value;
+
+  if (otp !== '2222') {
+    return res
+      .status(403)
+      .json(new ApiResponse(403, {}, "Invalid OTP."));
+  }
+
+  try {
+    const user = await User.findOne({ phone });
+    if (user) {
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefereshTokens(user._id);
+      const loggedInUser = await User.findById(user._id).select(
+        "-refreshToken"
+      );
+
+      const options = {
+        httpOnly: true,
+        secure: true,
+      };
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+          new ApiResponse(
+            200,
+            {
+              user: loggedInUser,
+              accessToken,
+              refreshToken,
+            },
+            "User logged In Successfully"
+          )
+        );
+    }
+    return res
+      .status(401)
+      .json(
+        new ApiResponse(400, {}, "User with this mobile number does not exist.")
+      );
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Failed to login user", error: err.message });
+  }
+});
+
 
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
@@ -413,97 +476,58 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
-const socialProfile = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-refreshToken");
+// pending
+// const socialProfile = asyncHandler(async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user._id).select("-refreshToken");
 
-    if (!user) {
-      throw new ApiError(401, "Invalid refresh token");
-    }
+//     if (!user) {
+//       throw new ApiError(401, "Invalid refresh token");
+//     }
 
-    const userSchema = Joi.object({
-      name: Joi.string().required(),
-      phone: Joi.string().length(10).required(),
-      email: Joi.string().email().required(),
-      gender: Joi.string().valid("Male", "Female", "Other").required(),
-      bloodGroup: Joi.string().valid(
-        "A+",
-        "A-",
-        "B+",
-        "B-",
-        "AB+",
-        "AB-",
-        "O+",
-        "O-"
-      ),
-      birthDay: Joi.date().iso().required(),
-      address1: Joi.string().required(),
-      address2: Joi.string().allow(null, ""),
-      state: Joi.string().required(),
-      country: Joi.string().required(),
-      personalInfo: Joi.string().allow(null, ""),
-    });
+//     // pending work - complete the below code
+//     const userSchema = Joi.object({
+//       name: Joi.string().required(),
+//       phone: Joi.string().length(10).required(),
+//       email: Joi.string().email().required(),
+//       gender: Joi.string().valid("Male", "Female", "Other").required(),
+//     });
 
-    const { error, value } = userSchema.validate(req.body);
+//     const { error, value } = userSchema.validate(req.body);
 
-    if (error) {
-      return res
-        .status(403)
-        .json(new ApiResponse(403, error.details[0], "Validation failed."));
-    }
+//     if (error) {
+//       return res
+//         .status(403)
+//         .json(new ApiResponse(403, error.details[0], "Validation failed."));
+//     }
 
-    const {
-      name,
-      phone,
-      email,
-      gender,
-      birthDay,
-      bloodGroup,
-      address1,
-      address2,
-      state,
-      country,
-      personalInfo,
-    } = req.body;
+//     const {
+//       name,
+//       phone,
+//       email,
+//       gender,
+//     } = req.body;
 
-    let profilePicture;
-    if (req.files?.profilePicture?.[0]?.path) {
-      const profilePicturePath = req.files.profilePicture[0].path;
-      profilePicture = await uploadOnCloudinary(profilePicturePath);
-    }
+//     user.name = name || user.name;
 
-    // Update user fields
-    if (profilePicture) user.profilePicture = profilePicture.url || "";
-    user.name = name || user.name;
-    user.phone = phone || user.phone;
-    user.email = email || user.email;
-    user.gender = gender || user.gender;
-    user.birthDay = birthDay || user.birthDay;
-    user.bloodGroup = bloodGroup || user.bloodGroup;
-    user.address1 = address1 || user.address1;
-    user.address2 = address2 || user.address2;
-    user.state = state || user.state;
-    user.country = country || user.country;
-    user.personalInfo = personalInfo || user.personalInfo;
+//     // Save the updated user
+//     await user.save();
 
-    // Save the updated user
-    await user.save();
-
-    return res.status(200).json(new ApiResponse(200, { user: user }));
-  } catch (error) {
-    return res
-      .status(401)
-      .json(new ApiResponse(401, error.message || "Invalid refresh token"));
-  }
-});
+//     return res.status(200).json(new ApiResponse(200, { user: user }));
+//   } catch (error) {
+//     return res
+//       .status(401)
+//       .json(new ApiResponse(401, error.message || "Invalid refresh token"));
+//   }
+// });
 
 export {
   registerUser,
-  loginUser,
+  loginUserByEmail,
+  loginUserByPhone,
   logoutUser,
   refreshAccessToken,
   userProfile,
   updateProfile,
   changePassword,
-  socialProfile
 };

@@ -5,7 +5,8 @@ import { upload } from "../middlewares/multer.middleware.js";
 // importing controller functions
 import {
   registerUser,
-  loginUser,
+  loginUserByEmail,
+  loginUserByPhone,
   logoutUser,
   refreshAccessToken,
   userProfile,
@@ -17,7 +18,8 @@ const router = Router();
 
 router.route("/register").post(registerUser);
 
-router.route("/login").post(loginUser);
+router.route("/loginWithEmail").post(loginUserByEmail);
+router.route("/loginWithPhone").post(loginUserByPhone);
 
 router.route("/logout").post(logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
