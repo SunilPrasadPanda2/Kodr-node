@@ -12,6 +12,8 @@ import {
   userProfile,
   updateProfile,
   changePassword,
+  socialProfiles,
+  getSocialProfiles,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -35,4 +37,6 @@ router.route("/updateProfile").post(
   updateProfile
 );
 router.route("/changePassword").post(verifyJWT, changePassword);
+router.route("/addSocialProfiles").post(verifyJWT, socialProfiles);
+router.route("/getSocialProfiles").get(verifyJWT, getSocialProfiles);
 export default router;

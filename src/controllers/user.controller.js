@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email: Joi.string().required(),
     gender: Joi.string().valid("Male", "Female", "Other").required(),
     password: Joi.string().required(),
-    confirmPassword: Joi.string().required(),
+    // confirmPassword: Joi.string().required(),
     userType: Joi.string().valid("Admin", "Trainer", "Student").required(),
   });
 
@@ -48,14 +48,14 @@ const registerUser = asyncHandler(async (req, res) => {
       .status(403)
       .json(new ApiResponse(403, error.details[0], "Validation failed."));
   }
-  const { name, phone, email, gender, password, confirmPassword, userType } =
+  const { name, phone, email, gender, password, userType } =
     req.body;
 
-  if (password !== confirmPassword) {
-    return res
-      .status(403)
-      .json(new ApiError(403, "Password and confirm password do not match"));
-  }
+  // if (password !== confirmPassword) {
+  //   return res
+  //     .status(403)
+  //     .json(new ApiError(403, "Password and confirm password do not match"));
+  // }
 
   try {
     const existingUser = await User.findOne({ phone, email });
@@ -200,10 +200,8 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
 
   const { phone, otp } = value;
 
-  if (otp !== '2222') {
-    return res
-      .status(403)
-      .json(new ApiResponse(403, {}, "Invalid OTP."));
+  if (otp !== "2222") {
+    return res.status(403).json(new ApiResponse(403, {}, "Invalid OTP."));
   }
 
   try {
@@ -246,7 +244,6 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
       .json({ message: "Failed to login user", error: err.message });
   }
 });
-
 
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
@@ -476,51 +473,73 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
-// pending
-// const socialProfile = asyncHandler(async (req, res) => {
-//   try {
-//     const user = await User.findById(req.user._id).select("-refreshToken");
+const socialProfiles = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-refreshToken");
 
-//     if (!user) {
-//       throw new ApiError(401, "Invalid refresh token");
-//     }
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
 
-//     // pending work - complete the below code
-//     const userSchema = Joi.object({
-//       name: Joi.string().required(),
-//       phone: Joi.string().length(10).required(),
-//       email: Joi.string().email().required(),
-//       gender: Joi.string().valid("Male", "Female", "Other").required(),
-//     });
+    const userSchema = Joi.object({
+      twitter: Joi.string().optional(),
+      facebook: Joi.string().optional(),
+      instagram: Joi.string().optional(),
+      linkedin: Joi.string().optional(),
+    });
 
-//     const { error, value } = userSchema.validate(req.body);
+    const { error, value } = userSchema.validate(req.body);
 
-//     if (error) {
-//       return res
-//         .status(403)
-//         .json(new ApiResponse(403, error.details[0], "Validation failed."));
-//     }
+    if (error) {
+      return res
+        .status(403)
+        .json(
+          new ApiResponse(403, error.details[0].message, "Validation failed.")
+        );
+    }
 
-//     const {
-//       name,
-//       phone,
-//       email,
-//       gender,
-//     } = req.body;
+    const { twitter, facebook, instagram, linkedin } = value;
 
-//     user.name = name || user.name;
+    if (!user.socialProfile) {
+      user.socialProfile = {};
+    }
+    if (twitter) user.socialProfile.twitter = twitter;
+    if (facebook) user.socialProfile.facebook = facebook;
+    if (instagram) user.socialProfile.instagram = instagram;
+    if (linkedin) user.socialProfile.linkedin = linkedin;
 
-//     // Save the updated user
-//     await user.save();
+    // Save the updated user
+    await user.save();
 
-//     return res.status(200).json(new ApiResponse(200, { user: user }));
-//   } catch (error) {
-//     return res
-//       .status(401)
-//       .json(new ApiResponse(401, error.message || "Invalid refresh token"));
-//   }
-// });
+    return res.status(200).json(
+      new ApiResponse(200, {
+        user: user,
+      })
+    );
+  } catch (error) {
+    return res
+      .status(401)
+      .json(new ApiResponse(401, error.message || "Invalid refresh token"));
+  }
+});
+const getSocialProfiles = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-refreshToken");
 
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+    return res.status(200).json(
+      new ApiResponse(200, {
+        socialProfiles: user.socialProfile,
+      })
+    );
+  } catch (error) {
+    return res
+      .status(401)
+      .json(new ApiResponse(401, error.message || "Invalid refresh token"));
+  }
+});
 export {
   registerUser,
   loginUserByEmail,
@@ -530,4 +549,6 @@ export {
   userProfile,
   updateProfile,
   changePassword,
+  socialProfiles,
+  getSocialProfiles,
 };
