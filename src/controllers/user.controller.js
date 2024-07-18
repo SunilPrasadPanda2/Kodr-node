@@ -47,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .status(403)
       .json(new ApiResponse(403, error.details[0], "Validation failed."));
   }
-  const { name, phone, email, gender, password, userType } = req.body;
+  const { name, phone, email, gender, password, userType } = value;
   try {
     const existingUser = await User.findOne({ phone, email });
     if (existingUser) {
