@@ -1,28 +1,27 @@
 import { Schema } from "mongoose";
 import User from "./users.model.js";
 
-// Define a schema for social profiles
 const socialProfileSchema = new Schema(
   {
     twitter: {
       type: String,
-      required: false, // Set to true if required
+      required: false,
     },
     facebook: {
       type: String,
-      required: false, // Set to true if required
+      required: false,
     },
     instagram: {
       type: String,
-      required: false, // Set to true if required
+      required: false,
     },
     linkedin: {
       type: String,
-      required: false, // Set to true if required
+      required: false,
     },
   },
   { _id: false }
-); // Disables the automatic generation of _id field
+);
 
 const adminSchema = new Schema(
   {

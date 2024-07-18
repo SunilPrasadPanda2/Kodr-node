@@ -37,7 +37,6 @@ const registerUser = asyncHandler(async (req, res) => {
     email: Joi.string().required(),
     gender: Joi.string().valid("Male", "Female", "Other").required(),
     password: Joi.string().required(),
-    // confirmPassword: Joi.string().required(),
     userType: Joi.string().valid("Admin", "Trainer", "Student").required(),
   });
 
@@ -49,13 +48,6 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(403, error.details[0], "Validation failed."));
   }
   const { name, phone, email, gender, password, userType } = req.body;
-
-  // if (password !== confirmPassword) {
-  //   return res
-  //     .status(403)
-  //     .json(new ApiError(403, "Password and confirm password do not match"));
-  // }
-
   try {
     const existingUser = await User.findOne({ phone, email });
     if (existingUser) {
@@ -63,16 +55,6 @@ const registerUser = asyncHandler(async (req, res) => {
         message: "User with provided phone number and email already exists",
       });
     }
-
-    // const profilePicturePath = req.files?.profilePicture?.[0]?.path;
-    // if (!profilePicturePath) {
-    //   throw new ApiError(400, "Profile picture file is required");
-    // }
-
-    // const profilePicture = await uploadOnCloudinary(profilePicturePath);
-
-    // // Update user fields
-    // user.profilePicture = profilePicture.url || "";
 
     let newUser;
     if (userType === "Admin") {
@@ -566,6 +548,7 @@ const socialProfiles = asyncHandler(async (req, res) => {
       .json(new ApiResponse(401, error.message || "Invalid refresh token"));
   }
 });
+
 const getSocialProfiles = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-refreshToken");
@@ -584,6 +567,7 @@ const getSocialProfiles = asyncHandler(async (req, res) => {
       .json(new ApiResponse(401, error.message || "Invalid refresh token"));
   }
 });
+
 export {
   registerUser,
   loginUserByEmail,
