@@ -25,7 +25,7 @@ router.route("/loginWithEmail").post(loginUserByEmail);
 router.route("/validatingPhone").post(validatingPhone);
 router.route("/validatingOtp").post(verifyJWT, validatingOtp);
 
-router.route("/logout").post(logoutUser);
+router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/profile").get(verifyJWT, userProfile);
 router.route("/updateProfile").post(

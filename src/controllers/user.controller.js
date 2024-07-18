@@ -291,7 +291,7 @@ const validatingOtp = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
-    req.body._id,
+    req.user._id,
     {
       $unset: {
         refreshToken: 1, // This removes the field from the document
