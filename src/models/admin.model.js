@@ -27,39 +27,39 @@ const adminSchema = new Schema(
   {
     profilePicture: {
       type: String,
-      required: true,
+      required: false,
     },
     birthDay: {
       type: Date,
-      required: true,
+      required: false,
     },
     bloodGroup: {
       type: String,
-      required: true,
+      required: false,
     },
     address1: {
       type: String,
-      required: true,
+      required: false,
     },
     address2: {
       type: String,
-      required: true,
+      required: false,
     },
     state: {
       type: String,
-      required: true,
+      required: false,
     },
     country: {
       type: String,
-      required: true,
+      required: false,
     },
     personalInfo: {
       type: String,
-      required: true,
+      required: false,
     },
     socialProfile: {
       type: socialProfileSchema,
-      required: false, // Set to true if the entire socialProfile is required
+      required: false, // Set to false if the entire socialProfile is required
     },
   },
   {
