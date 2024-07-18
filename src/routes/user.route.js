@@ -6,7 +6,8 @@ import { upload } from "../middlewares/multer.middleware.js";
 import {
   registerUser,
   loginUserByEmail,
-  loginUserByPhone,
+  validatingPhone,
+  validatingOtp,
   logoutUser,
   refreshAccessToken,
   userProfile,
@@ -21,7 +22,8 @@ const router = Router();
 router.route("/register").post(registerUser);
 
 router.route("/loginWithEmail").post(loginUserByEmail);
-router.route("/loginWithPhone").post(loginUserByPhone);
+router.route("/validatingPhone").post(validatingPhone);
+router.route("/validatingOtp").post(verifyJWT, validatingOtp);
 
 router.route("/logout").post(logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);

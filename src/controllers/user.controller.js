@@ -184,10 +184,9 @@ const loginUserByEmail = asyncHandler(async (req, res) => {
   }
 });
 
-const loginUserByPhone = asyncHandler(async (req, res) => {
+const validatingPhone = asyncHandler(async (req, res) => {
   const userLoginSchema = Joi.object({
     phone: Joi.string().required(),
-    // otp: Joi.string().length(4).pattern(/^\d+$/).required(),
   });
 
   const { error, value } = userLoginSchema.validate(req.body);
@@ -199,23 +198,17 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
 
   const { phone } = value;
 
-  // if (otp !== "2222") {
-  //   return res.status(403).json(new ApiResponse(403, {}, "Invalid OTP."));
-  // }
-
   try {
     const user = await User.findOne({ phone });
     if (user) {
       const { accessToken, refreshToken } =
         await generateAccessAndRefereshTokens(user._id);
-      const loggedInUser = await User.findById(user._id).select(
-        "-refreshToken"
-      );
 
       const options = {
         httpOnly: true,
         secure: true,
       };
+
       return res
         .status(200)
         .cookie("accessToken", accessToken, options)
@@ -224,11 +217,10 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
           new ApiResponse(
             200,
             {
-              user: loggedInUser,
               accessToken,
               refreshToken,
             },
-            "User logged In Successfully"
+            "User Mobile number verified"
           )
         );
     }
@@ -236,6 +228,59 @@ const loginUserByPhone = asyncHandler(async (req, res) => {
       .status(401)
       .json(
         new ApiResponse(400, {}, "User with this mobile number does not exist.")
+      );
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Failed to login user", error: err.message });
+  }
+});
+
+const validatingOtp = asyncHandler(async (req, res) => {
+  const userLoginSchema = Joi.object({
+    otp: Joi.string().length(4).pattern(/^\d+$/).required(),
+  });
+
+  const { error, value } = userLoginSchema.validate(req.body);
+  if (error) {
+    return res
+      .status(403)
+      .json(new ApiResponse(403, error.details[0], "Validation failed."));
+  }
+
+  const { otp } = value;
+
+  if (otp !== "2222") {
+    return res.status(403).json(new ApiResponse(403, {}, "Invalid OTP."));
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select("-refreshToken");
+
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+      user._id
+    );
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          {
+            user: user,
+            accessToken,
+            refreshToken,
+          },
+          "User logged In Successfully"
+        )
       );
   } catch (err) {
     return res
@@ -542,7 +587,8 @@ const getSocialProfiles = asyncHandler(async (req, res) => {
 export {
   registerUser,
   loginUserByEmail,
-  loginUserByPhone,
+  validatingPhone,
+  validatingOtp,
   logoutUser,
   refreshAccessToken,
   userProfile,
