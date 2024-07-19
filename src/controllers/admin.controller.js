@@ -1,6 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { ApiError } from "../utils/ApiError.js";
 import Joi from "joi";
 import User from "../models/users.model.js";
 import Trainer from "../models/trainer.model.js";
@@ -127,10 +126,15 @@ const addUser = asyncHandler(async (req, res) => {
       );
 
       if (!createdUser) {
-        throw new ApiError(
-          500,
-          `Something went wrong while adding the ${userType}`
-        );
+        return res
+          .status(500)
+          .json(
+            new ApiResponse(
+              500,
+              {},
+              `Something went wrong while adding the ${userType}`
+            )
+          );
       }
 
       return res
@@ -141,9 +145,7 @@ const addUser = asyncHandler(async (req, res) => {
     } else {
       return res
         .status(403)
-        .json(
-          new ApiResponse(403, `You are not authorized`)
-        );
+        .json(new ApiResponse(403, `You are not authorized`));
     }
   } catch (error) {
     return res
