@@ -455,13 +455,16 @@ const updateProfile = asyncHandler(async (req, res) => {
       profilePicture = await uploadOnCloudinary(profilePicturePath);
     }
 
+    // Format birthDay to YYYY-MM-DD
+    const formattedBirthDay = new Date(birthDay).toISOString().split('T')[0];
+
     // Update user fields
     if (profilePicture) user.profilePicture = profilePicture.url || "";
     user.name = name || user.name;
     user.phone = phone || user.phone;
     user.email = email || user.email;
     user.gender = gender || user.gender;
-    user.birthDay = birthDay || user.birthDay;
+    user.birthDay = formattedBirthDay || user.birthDay;
     user.bloodGroup = bloodGroup || user.bloodGroup;
     user.address1 = address1 || user.address1;
     user.address2 = address2 || user.address2;

@@ -30,7 +30,7 @@ const StudentSchema = new Schema(
       required: false,
     },
     birthDay: {
-      type: Date,
+      type: String,
       required: false,
     },
     bloodGroup: {
