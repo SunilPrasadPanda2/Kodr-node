@@ -232,6 +232,145 @@ const viewUser = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUser = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-refreshToken");
+    if (user.userType === "Admin") {
+      if (req.body.socialProfile) {
+        req.body.socialProfile = JSON.parse(req.body.socialProfile);
+      }
+      const userSchema = Joi.object({
+        _id: Joi.string().required(),
+        name: Joi.string().required(),
+        phone: Joi.string().length(10).required(),
+        email: Joi.string().email().required(),
+        gender: Joi.string().valid("Male", "Female", "Other").required(),
+        bloodGroup: Joi.string().valid(
+          "A+",
+          "A-",
+          "B+",
+          "B-",
+          "AB+",
+          "AB-",
+          "O+",
+          "O-"
+        ),
+        birthDay: Joi.date().iso().required(),
+        address1: Joi.string().required(),
+        address2: Joi.string().required(),
+        state: Joi.string().required(),
+        country: Joi.string().required(),
+        personalInfo: Joi.string().required(),
+        socialProfile: Joi.object({
+          twitter: Joi.string().allow(null, ""),
+          facebook: Joi.string().allow(null, ""),
+          instagram: Joi.string().allow(null, ""),
+          linkedin: Joi.string().allow(null, ""),
+        }).optional(),
+      });
+
+      const { error, value } = userSchema.validate(req.body);
+
+      if (error) {
+        return res
+          .status(403)
+          .json(new ApiResponse(403, error.details[0], "Validation failed."));
+      }
+
+      const {
+        _id,
+        name,
+        phone,
+        email,
+        gender,
+        birthDay,
+        bloodGroup,
+        address1,
+        address2,
+        state,
+        country,
+        personalInfo,
+        socialProfile,
+      } = req.body;
+
+      const Updateuser = await User.findById(_id);
+
+      if (Updateuser.phone != phone || Updateuser.email != email) {
+        const existingUser = await User.findOne({ phone, email });
+
+        if (existingUser) {
+          return res.status(409).json({
+            message: "User with provided phone number and email already exists",
+          });
+        }
+      }
+
+      let profilePicture;
+      if (req.files?.profilePicture?.[0]?.path) {
+        const profilePicturePath = req.files.profilePicture[0].path;
+        profilePicture = await uploadOnCloudinary(profilePicturePath);
+      }
+
+      // Format birthDay to YYYY-MM-DD
+      const formattedBirthDay = new Date(birthDay).toISOString().split("T")[0];
+
+      // Update user fields
+      if (profilePicture) Updateuser.profilePicture = profilePicture.url || "";
+      Updateuser.name = name || Updateuser.name;
+      Updateuser.phone = phone || Updateuser.phone;
+      Updateuser.email = email || Updateuser.email;
+      Updateuser.gender = gender || Updateuser.gender;
+      Updateuser.birthDay = formattedBirthDay || Updateuser.birthDay;
+      Updateuser.bloodGroup = bloodGroup || Updateuser.bloodGroup;
+      Updateuser.address1 = address1 || Updateuser.address1;
+      Updateuser.address2 = address2 || Updateuser.address2;
+      Updateuser.state = state || Updateuser.state;
+      Updateuser.country = country || Updateuser.country;
+      Updateuser.personalInfo = personalInfo || Updateuser.personalInfo;
+
+      // Update social profile
+      if (socialProfile) {
+        if (!Updateuser.socialProfile) {
+          Updateuser.socialProfile = {};
+        }
+        if (socialProfile.twitter)
+          Updateuser.socialProfile.twitter =
+            socialProfile.twitter || Updateuser.socialProfile.twitter;
+        if (socialProfile.facebook)
+          Updateuser.socialProfile.facebook =
+            socialProfile.facebook || Updateuser.socialProfile.facebook;
+        if (socialProfile.instagram)
+          Updateuser.socialProfile.instagram =
+            socialProfile.instagram || Updateuser.socialProfile.instagram;
+        if (socialProfile.linkedin)
+          Updateuser.socialProfile.linkedin =
+            socialProfile.linkedin || Updateuser.socialProfile.linkedin;
+      }
+
+      // Save the updated user
+      await Updateuser.save();
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            { user: Updateuser },
+            "User updated Successfully"
+          )
+        );
+    } else {
+      return res
+        .status(403)
+        .json(new ApiResponse(403, "You are not authorized"));
+    }
+  } catch (error) {
+    return res
+      .status(401)
+      .json(new ApiResponse(401, error.message || "Invalid refresh token"));
+  }
+});
+
 const addBanner = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-refreshToken");
@@ -350,4 +489,5 @@ export {
   banners,
   deleteUser,
   viewUser,
+  updateUser,
 };

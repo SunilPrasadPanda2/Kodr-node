@@ -9,14 +9,30 @@ import {
   banners,
   deleteUser,
   viewUser,
+  updateUser,
 } from "../controllers/admin.controller.js";
 
 const router = Router();
+// user routes i.e  student and trainer
 router.route("/trainers").get(verifyJWT, trainers);
 router.route("/students").get(verifyJWT, students);
+
+// in the below 4 routes user can be trainer or student
 router.route("/addUser").post(verifyJWT, addUser);
 router.route("/deleteUser").delete(verifyJWT, deleteUser);
 router.route("/viewUser").get(verifyJWT, viewUser);
+router.route("/updateUser").post(
+  verifyJWT,
+  upload.fields([
+    {
+      name: "profilePicture",
+      maxCount: 1,
+    },
+  ]),
+  updateUser
+);
+
+// banner routes
 router.route("/addBanner").post(
   verifyJWT,
   upload.fields([

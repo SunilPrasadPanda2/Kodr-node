@@ -449,6 +449,18 @@ const updateProfile = asyncHandler(async (req, res) => {
       personalInfo,
     } = req.body;
 
+    const Updateuser = await User.findById(req.user._id);
+
+    if (Updateuser.phone != phone || Updateuser.email != email) {
+      const existingUser = await User.findOne({ phone, email });
+
+      if (existingUser) {
+        return res.status(409).json({
+          message: "User with provided phone number and email already exists",
+        });
+      }
+    }
+
     let profilePicture;
     if (req.files?.profilePicture?.[0]?.path) {
       const profilePicturePath = req.files.profilePicture[0].path;
@@ -456,7 +468,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     }
 
     // Format birthDay to YYYY-MM-DD
-    const formattedBirthDay = new Date(birthDay).toISOString().split('T')[0];
+    const formattedBirthDay = new Date(birthDay).toISOString().split("T")[0];
 
     // Update user fields
     if (profilePicture) user.profilePicture = profilePicture.url || "";
