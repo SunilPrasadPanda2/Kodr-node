@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import Joi from "joi";
+// importing models
 import User from "../models/users.model.js";
 import Trainer from "../models/trainer.model.js";
 import Student from "../models/student.model.js";
@@ -205,7 +206,8 @@ const viewUser = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-refreshToken");
     if (user.userType === "Admin") {
-      const userId = req.body._id;
+      const { _id } = req.query;
+      const userId = _id;
       const userData = await User.findById(userId).select("-refreshToken");
       if (!userData) {
         return res.status(404).json(new ApiResponse(404, {}, "User not found"));

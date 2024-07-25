@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-// routes
+// importing routes
 import userRoute from "./routes/user.route.js";
 import adminRoute from "./routes/admin.route.js";
 import trainerRoute from "./routes/trainer.route.js";
