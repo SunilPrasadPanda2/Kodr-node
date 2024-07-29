@@ -1,45 +1,41 @@
 import mongoose, { Schema } from "mongoose";
 
 const lessonSchema = new Schema({
-  title: { type: String, required: true },
-  videos: { type: String, required: true },
-  duration: { type: String, required: true },
+  title: { type: String, required: false },
+  videos: { type: String, required: false },
+  duration: { type: String, required: false },
 });
 
 const sectionSchema = new Schema({
   title: { type: String, required: true },
-  sectionNumber: { type: String, required: true },
-  numberOfLessons: { type: Number },
-  duration: { type: String, required: true },
-  description: { type: String },
+  numberOfLessons: { type: Number, required: false },
+  duration: { type: String, required: false },
+  description: { type: String, required: false },
   lessons: [lessonSchema],
 });
 
 const courseSchema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  longDescription: { type: String },
-  studentsEnrolled: { type: Number, default: 0 },
-  level: {
-    type: String,
-    required: true,
-    enum: ["beginner level", "intermediate level", "advanced level"],
-  },
-  whatStudentsLearn: { type: String, required: true },
-  requirements: { type: String },
-  audio: { type: String },
-  closeCaption: { type: String },
-  author: { type: String, required: true },
-  aboutAuthor: { type: String },
-  categoryId: {
+  category: {
     type: Schema.Types.ObjectId,
     ref: "Category",
   },
-  subCategoryId: {
-    type: Schema.Types.ObjectId,
-    ref: "SubCategory",
+  courseName: { type: String, required: true },
+  courseImage: {
+    type: String,
+    required: false,
   },
+  description: { type: String, required: true },
+  longDescription: { type: String, required: true },
+  studentsEnrolled: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
+  closeCaption: { type: String, required: false },
+  author: { type: String, required: true },
+  aboutAuthor: { type: String, required: true },
   sections: [sectionSchema],
+  numberOfSections: { type: Number, required: false },
 });
 
 const Course = mongoose.model("Course", courseSchema);

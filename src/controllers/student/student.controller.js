@@ -1,11 +1,11 @@
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import User from "../models/users.model.js";
-import Student from "../models/student.model.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
+import User from "../../models/users.model.js";
+import Student from "../../models/student.model.js";
 import Joi from "joi";
 import bcrypt from "bcrypt";
-import Banner from "../models/banners.model.js";
+import Banner from "../../models/banners.model.js";
 
 const banners = asyncHandler(async (req, res) => {
   try {

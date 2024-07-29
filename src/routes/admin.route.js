@@ -10,7 +10,11 @@ import {
   deleteUser,
   viewUser,
   updateUser,
-} from "../controllers/admin.controller.js";
+} from "../controllers/admin/admin.controller.js";
+import {
+  addCategory,
+  addCourse,
+} from "../controllers/admin/course.controller.js";
 
 const router = Router();
 // user routes i.e  student and trainer
@@ -44,4 +48,19 @@ router.route("/addBanner").post(
   addBanner
 );
 router.route("/banners").get(verifyJWT, banners);
+
+// category routes
+router.route("/addCategory").post(verifyJWT, addCategory);
+
+// course routes
+router.route("/addCourse").post(
+  verifyJWT,
+  upload.fields([
+    {
+      name: "courseImage",
+      maxCount: 1,
+    },
+  ]),
+  addCourse
+);
 export default router;

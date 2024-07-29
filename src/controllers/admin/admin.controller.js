@@ -1,12 +1,12 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import Joi from "joi";
 // importing models
-import User from "../models/users.model.js";
-import Trainer from "../models/trainer.model.js";
-import Student from "../models/student.model.js";
-import Banner from "../models/banners.model.js";
+import User from "../../models/users.model.js";
+import Trainer from "../../models/trainer.model.js";
+import Student from "../../models/student.model.js";
+import Banner from "../../models/banners.model.js";
 
 const trainers = asyncHandler(async (req, res) => {
   try {
